@@ -164,4 +164,13 @@ gulp.task('watch', function () {
 
 gulp.task('build', ['scripts', 'plugins-scripts', 'langs', 'icons', 'sass-dist', 'plugins-sass-dist']);
 
-gulp.task('default', ['build', 'watch']);
+let connect = require('gulp-connect');
+gulp.task('webserver', function() {
+    connect.server({
+        port: 9090,
+        livereload: true
+    });
+});
+
+gulp.task('default', ['build', 'webserver', 'watch']);
+
