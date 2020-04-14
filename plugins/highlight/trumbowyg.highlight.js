@@ -63,11 +63,14 @@
             en: {
                 highlight: 'Code syntax highlight'
             },
-            pt_br: {
-                highlight: 'Realçar sintaxe de código'
+            hu: {
+                highlight: 'Kód kiemelés'
             },
             ko: {
                 highlight: '코드 문법 하이라이트'
+            },
+            pt_br: {
+                highlight: 'Realçar sintaxe de código'
             },
             // jshint camelcase:true
         },

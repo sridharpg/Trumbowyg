@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <title>Trumbowyg by Alex-D</title>
+        <base href="/test/base/url/">
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+        <style>
+            html,
+            body {
+                margin: 0;
+                padding: 0;
+                background-color: #f4f7fa;
+                font-family: "Trebuchet MS", Verdana, Arial, Helvetica, sans-serif;
+            }
+
+            header {
+                text-align: center;
+            }
+
+            .container {
+                max-width: 960px;
+                margin: 0 auto;
+            }
+
+            .dark-section {
+                background: #111;
+                color: #ddd;
+                margin-top: 50px;
+                padding: 50px 0 100px;
+            }
+
+            .dark-section .title {
+                font-weight: normal;
+                text-align: center;
+                font-size: 32px;
+                margin: 20px 0 50px;
+            }
+
+            .form-submit {
+                background: transparent;
+                border: 1px solid #555;
+                color: #ccc;
+                padding: 7px 13px;
+                margin-right: 17px;
+                float: right;
+            }
+
+            h2 {
+                font-size: 26px;
+            }
+
+            h1 + pre,
+            h2 + pre,
+            h3 + pre,
+            h4 + pre {
+                margin-top: -20px;
+            }
+
+            .trumbowyg-abs {
+                position: absolute;
+                transition: all;
+                transition-duration: .3s;
+            }
+
+            .trumbowyg-abs .trumbowyg-box {
+                min-height: auto !important;
+                margin: 0;
+            }
+
+            .trumbowyg-abs .trumbowyg .trumbowyg-editor {
+                display: none;
+            }
+        </style>
+        <link rel="stylesheet" href="/dist/ui/trumbowyg.min.css">
+        <link rel="stylesheet" href="/dist/plugins/colors/ui/trumbowyg.colors.css">
+    </head>
+    <body>
+        <div class="container">
+            <header>
+                <h1>Examples of use Trumbowyg</h1>
+
+                <p>
+                    Close an editor on clic on "Close" in top right corner. <br>
+                    To reopen an editor, double-click on his text.
+                </p>
+            </header>
+
+            <div data-editable id="default-editor">
+                <h2>This editor is the default build of Trumbowyg.</h2>
+                <p>
+                    Lorem ipsum dolor sit amet, <a href="https://alex-d.github.io/Trumbowyg/">consectetur adipisicing</a> elit. Possimus, aliquam, minima fugiat placeat provident optio nam reiciendis eius beatae quibusdam!
+                </p>
+                <p>
+                    The text is derived from Cicero's De Finibus Bonorum et Malorum (On the Ends of Goods and Evils, or alternatively [About] The Purposes of Good and Evil ). The original passage began: Neque porro quisquam est qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit (Translation: &quot;Neither is there anyone who loves grief itself since it is grief and thus wants to obtain it&quot;).
+                </p>
+            </div>
+
+            <div data-editable id="simple-editor">
+                <h2>This is a minimalist demo of Trumbowyg.</h2>
+                <p>
+                    Lorem ipsum dolor sit amet, consectetur adipisicing elit. Possimus, aliquam, minima fugiat placeat provident optio nam reiciendis eius beatae quibusdam!
+                </p>
+            </div>
+
+        </div>
+
+        <script src="/node_modules/jquery/dist/jquery.min.js"></script>
+        <script src="/dist/trumbowyg.js"></script>
+        <script src="/dist/langs/fr.min.js"></script>
+        <script src="/dist/plugins/editableSections/trumbowyg.editablesections.js"></script>
+        <script>
+            var ele = $('<div>'),
+                coreEditor = $('<div>').addClass('trumbowyg-dark').append(ele);
+
+            /** Default editor configuration **/
+            ele.trumbowyg({}).on('tbwchange', function(e) {
+            	console.log($(ele).trumbowyg('html'));
+            }).on('tbwblur', function(e) {
+            	setTimeout(function() {
+            		if(document.activeElement !== obj.$ed[0]) {
+            			console.log(document.activeElement, obj.$ed[0]);
+			            coreEditor.fadeOut({
+				            duration: 150
+			            });
+			            obj.swapEditor(orgEditor);
+			            ele.trumbowyg('disable');
+                    }
+                }, 50);
+            });
+
+            var obj = ele.data('trumbowyg');
+            var orgEditor = ele.$ed;
+
+            coreEditor.appendTo($('body'));
+
+            coreEditor.addClass('trumbowyg-abs');
+            ele.trumbowyg('disable');
+            coreEditor.hide();
+
+            $('.container').on('click', '[data-editable]', function(e) {
+            	let target = $(e.currentTarget);
+	            target.attr('contenteditable', true);
+	            obj.swapEditor(target);
+	            target.focus();
+
+	            var left_position = target.offset().left - $(document).scrollLeft(),
+                    top_position = target.offset().top - $(document).scrollTop() - coreEditor.height();
+
+	            if(!coreEditor.is(':visible')) {
+	                coreEditor.fadeIn({
+		                duration: 250
+	                });
+                }
+                coreEditor.css({
+                    left: left_position,
+                    top: top_position
+                });
+	            ele.trumbowyg('enable');
+            });
+        </script>
+    </body>
+</html>

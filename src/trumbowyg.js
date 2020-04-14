@@ -577,13 +577,47 @@ Object.defineProperty(jQuery.trumbowyg, 'defaultOptions', {
                 t.$ed.addClass(prefix + 'autogrow-on-enter');
             }
 
-            var ctrl = false,
+            this.addEditorEvents();
+
+            t.$ta
+                .on('keyup', function () {
+                    t.$c.trigger('tbwchange');
+                })
+                .on('paste', function () {
+                    setTimeout(function () {
+                        t.$c.trigger('tbwchange');
+                    }, 0);
+                });
+
+            $(t.doc.body).on('keydown.' + t.eventNamespace, function (e) {
+                if (e.which === 27 && $('.' + prefix + 'modal-box').length >= 1) {
+                    t.closeModal();
+                    return false;
+                }
+            });
+        },
+
+        swapEditor: function(newEditor) {
+            this.removeEditorEvents();
+            this.$ed = newEditor;
+            this.addEditorEvents();
+            this.updateButtonPaneStatus();
+        },
+
+        addEditorEvents: function() {
+            var t = this,
+                ctrl = false,
                 composition = false,
                 debounceButtonPaneStatus;
 
             t.$ed
-                .on('dblclick', 'img', t.o.imgDblClickHandler)
-                .on('keydown', function (e) {
+                .on('dblclick.trumbowyg', 'img', t.o.imgDblClickHandler)
+                .on('keydown.trumbowyg', function (e) {
+                    // append flags to differentiate Chrome spans
+                    var keyCode = e.which;
+                    if (keyCode === 8 || keyCode === 13 || keyCode === 46) {
+                        t.toggleSpan(true);
+                    }
                     if ((e.ctrlKey || e.metaKey) && !e.altKey) {
                         ctrl = true;
                         var key = t.keys[String.fromCharCode(e.which).toUpperCase()];
@@ -605,10 +639,10 @@ Object.defineProperty(jQuery.trumbowyg, 'defaultOptions', {
                         }
                     }
                 })
-                .on('compositionstart compositionupdate', function () {
+                .on('compositionstart.trumbowyg compositionupdate.trumbowyg', function () {
                     composition = true;
                 })
-                .on('keyup compositionend', function (e) {
+                .on('keyup.trumbowyg compositionend.trumbowyg', function (e) {
                     if (e.type === 'compositionend') {
                         composition = false;
                     } else if (composition) {
@@ -619,6 +653,11 @@ Object.defineProperty(jQuery.trumbowyg, 'defaultOptions', {
 
                     if (keyCode >= 37 && keyCode <= 40) {
                         return;
+                    }
+
+                    // remove Chrome generated span tags
+                    if (keyCode === 8 || keyCode === 13 || keyCode === 46) {
+                        t.toggleSpan();
                     }
 
                     if ((e.ctrlKey || e.metaKey) && (keyCode === 89 || keyCode === 90)) {
@@ -636,7 +675,7 @@ Object.defineProperty(jQuery.trumbowyg, 'defaultOptions', {
                         ctrl = false;
                     }, 50);
                 })
-                .on('mouseup keydown keyup', function (e) {
+                .on('mouseup.trumbowyg keydown.trumbowyg keyup.trumbowyg', function (e) {
                     if ((!e.ctrlKey && !e.metaKey) || e.altKey) {
                         setTimeout(function () { // "hold on" to the ctrl key for 50ms
                             ctrl = false;
@@ -647,8 +686,12 @@ Object.defineProperty(jQuery.trumbowyg, 'defaultOptions', {
                         t.updateButtonPaneStatus();
                     }, 50);
                 })
-                .on('focus blur', function (e) {
+                .on('focus.trumbowyg blur.trumbowyg', function (e) {
                     if (e.type === 'blur') {
+                        if($(e.relatedTarget).closest('.trumbowyg-modal').length) {
+                            //clicked inside the modal
+                            return;
+                        }
                         t.clearButtonPaneStatus();
                     }
                     t.$c.trigger('tbw' + e.type);
@@ -666,7 +709,7 @@ Object.defineProperty(jQuery.trumbowyg, 'defaultOptions', {
                         }
                     }
                 })
-                .on('keyup focus', function () {
+                .on('keyup.trumbowyg focus.trumbowyg', function () {
                     if (!t.$ta.val().match(/<.*>/)) {
                         setTimeout(function () {
                             var block = t.isIE ? '<p>' : 'p';
@@ -675,13 +718,13 @@ Object.defineProperty(jQuery.trumbowyg, 'defaultOptions', {
                         }, 0);
                     }
                 })
-                .on('cut drop', function () {
+                .on('cut.trumbowyg drop.trumbowyg', function () {
                     setTimeout(function () {
                         t.semanticCode(false, true);
                         t.$c.trigger('tbwchange');
                     }, 0);
                 })
-                .on('paste', function (e) {
+                .on('paste.trumbowyg', function (e) {
                     if (t.o.removeformatPasted) {
                         e.preventDefault();
 
@@ -718,23 +761,10 @@ Object.defineProperty(jQuery.trumbowyg, 'defaultOptions', {
                         t.$c.trigger('tbwchange');
                     }, 0);
                 });
+        },
 
-            t.$ta
-                .on('keyup', function () {
-                    t.$c.trigger('tbwchange');
-                })
-                .on('paste', function () {
-                    setTimeout(function () {
-                        t.$c.trigger('tbwchange');
-                    }, 0);
-                });
-
-            $(t.doc.body).on('keydown.' + t.eventNamespace, function (e) {
-                if (e.which === 27 && $('.' + prefix + 'modal-box').length >= 1) {
-                    t.closeModal();
-                    return false;
-                }
-            });
+        removeEditorEvents: function() {
+            this.$ed.off('.trumbowyg');
         },
 
         //autogrow when entering logic
@@ -1014,6 +1044,8 @@ Object.defineProperty(jQuery.trumbowyg, 'defaultOptions', {
 
             t.$ed.off('dblclick', 'img');
 
+            this.removeEditorEvents();
+
             t.destroyPlugins();
 
             t.$box.remove();
@@ -1059,6 +1091,18 @@ Object.defineProperty(jQuery.trumbowyg, 'defaultOptions', {
                     t.autogrowEditorOnEnter();
                 }
             }, 0);
+        },
+
+        // Remove or add flags to span tags to remove Chrome generated spans
+        toggleSpan: function (addFlag) {
+            var t = this;
+            t.$ed.find('span').each(function () {
+                if (addFlag === true) {
+                    $(this).attr('data-tbw-flag', true);
+                } else {
+                    $(this).attr('data-tbw-flag') ? $(this).removeAttr('data-tbw-flag') : $(this).contents().unwrap();
+                }
+            });
         },
 
         // Open dropdown when click on a button which open that
@@ -1819,6 +1863,7 @@ Object.defineProperty(jQuery.trumbowyg, 'defaultOptions', {
                 $(this).find('svg use').attr('xlink:href', $(this).data(originalIconClass));
             });
         },
+
         updateButtonPaneStatus: function () {
             var t = this,
                 prefix = t.o.prefix,
