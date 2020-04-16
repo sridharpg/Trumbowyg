@@ -46,6 +46,10 @@
                 float: right;
             }
 
+            #flat-buttonpane {
+                background: lightgrey !important;
+            }
+
             h2 {
                 font-size: 26px;
             }
@@ -113,11 +117,13 @@ $('#simple-editor').trumbowyg({
                 </pre></code>
             </div>
 
-            <div id="flat-buttonpane">
-                <h2>All buttons of Trumbowyg are here.</h2>
-                <p>
-                    Lorem ipsum dolor sit amet, consectetur adipisicing elit. Possimus, aliquam, minima fugiat placeat provident optio nam reiciendis eius beatae quibusdam!
-                </p>
+            <div class="trumbowyg-dark" style="background: lightgrey">
+                <div id="flat-buttonpane">
+                    <h2>All buttons of Trumbowyg are here.</h2>
+                    <p>
+                        Lorem ipsum dolor sit amet, consectetur adipisicing elit. Possimus, aliquam, minima fugiat placeat provident optio nam reiciendis eius beatae quibusdam!
+                    </p>
+                </div>
             </div>
 
             <div id="customized-buttonpane">
@@ -216,6 +222,7 @@ $('#form-content').trumbowyg({
         <script src="/dist/trumbowyg.js"></script>
         <script src="/dist/langs/fr.min.js"></script>
         <script src="/dist/plugins/base64/trumbowyg.base64.js"></script>
+        <script src="/dist/plugins/cleanpaste/trumbowyg.cleanpaste.js"></script>
         <script src="/dist/plugins/colors/trumbowyg.colors.js"></script>
         <script src="/dist/plugins/noembed/trumbowyg.noembed.js"></script>
         <script src="/dist/plugins/pasteimage/trumbowyg.pasteimage.js"></script>
@@ -223,6 +230,7 @@ $('#form-content').trumbowyg({
         <script src="/dist/plugins/preformatted/trumbowyg.preformatted.js"></script>
         <script src="/dist/plugins/ruby/trumbowyg.ruby.js"></script>
         <script src="/dist/plugins/upload/trumbowyg.upload.js"></script>
+        <script src="/node_modules/sanitize-html/dist/sanitize-html.js"></script>
         <script>
             /** Default editor configuration **/
             $('#default-editor, #empty-textarea, #disabled-textarea')
@@ -290,8 +298,10 @@ $('#form-content').trumbowyg({
                     ['template'],
                     ['fullscreen', 'close']
                 ],
-                plugins: {
-                    upload: uploadOptions,
+	            cleanPaste: true,
+	            plugins: {
+                	cleanPaste: true,
+	                upload: uploadOptions,
                     templates: [
                         {
                             name: 'Template 1',

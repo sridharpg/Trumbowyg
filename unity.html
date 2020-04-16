@@ -96,7 +96,7 @@
                 </p>
             </div>
 
-            <div data-editable id="simple-editor">
+            <div data-editable id="simple-editor" data-dark-theme>
                 <h2>This is a minimalist demo of Trumbowyg.</h2>
                 <p>
                     Lorem ipsum dolor sit amet, consectetur adipisicing elit. Possimus, aliquam, minima fugiat placeat provident optio nam reiciendis eius beatae quibusdam!
@@ -108,55 +108,12 @@
         <script src="/node_modules/jquery/dist/jquery.min.js"></script>
         <script src="/dist/trumbowyg.js"></script>
         <script src="/dist/langs/fr.min.js"></script>
-        <script src="/dist/plugins/editableSections/trumbowyg.editablesections.js"></script>
+        <script src="/dist/plugins/unity/trumbowyg.unity.js"></script>
         <script>
-            var ele = $('<div>'),
-                coreEditor = $('<div>').addClass('trumbowyg-dark').append(ele);
-
-            /** Default editor configuration **/
-            ele.trumbowyg({}).on('tbwchange', function(e) {
-            	console.log($(ele).trumbowyg('html'));
-            }).on('tbwblur', function(e) {
-            	setTimeout(function() {
-            		if(document.activeElement !== obj.$ed[0]) {
-            			console.log(document.activeElement, obj.$ed[0]);
-			            coreEditor.fadeOut({
-				            duration: 150
-			            });
-			            obj.swapEditor(orgEditor);
-			            ele.trumbowyg('disable');
-                    }
-                }, 50);
-            });
-
-            var obj = ele.data('trumbowyg');
-            var orgEditor = ele.$ed;
-
-            coreEditor.appendTo($('body'));
-
-            coreEditor.addClass('trumbowyg-abs');
-            ele.trumbowyg('disable');
-            coreEditor.hide();
-
-            $('.container').on('click', '[data-editable]', function(e) {
-            	let target = $(e.currentTarget);
-	            target.attr('contenteditable', true);
-	            obj.swapEditor(target);
-	            target.focus();
-
-	            var left_position = target.offset().left - $(document).scrollLeft(),
-                    top_position = target.offset().top - $(document).scrollTop() - coreEditor.height();
-
-	            if(!coreEditor.is(':visible')) {
-	                coreEditor.fadeIn({
-		                duration: 250
-	                });
-                }
-                coreEditor.css({
-                    left: left_position,
-                    top: top_position
-                });
-	            ele.trumbowyg('enable');
+            $('.container').trumbowygUnity({
+                editableSections: '[data-editable]'
+            }).on('tbwchange', function(e) {
+	            console.log($(this).trumbowyg('html'));
             });
         </script>
     </body>
